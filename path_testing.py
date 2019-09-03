@@ -41,5 +41,5 @@ class files_():
 
 
 if __name__ == '__main__':
-    f = files_('C:/Users/Administrator/Documents/GitHub/ploty_dash/data')
+    f = files_('data')
     
