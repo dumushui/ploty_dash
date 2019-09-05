@@ -12,8 +12,8 @@ from path_testing import files_
 import pathlib
 import flask
 
-
-f = files_('data')
+folder = 'data'
+f = files_('data/situation1')
 
 
 external_stylesheets = ['https:/codepen.io/chriddyp/pen/bWLwgP.css']
@@ -51,19 +51,19 @@ def markdown_popup():
                             dcc.Markdown(
                                 children=dedent(
                                     """
-                                ##### What am I looking at?
+                                ##### 需要帮助?
                                 
-                                This app enhances visualization of objects detected using state-of-the-art Mobile Vision Neural Networks.
-                                Most user generated videos are dynamic and fast-paced, which might be hard to interpret. A confidence
-                                heatmap stays consistent through the video and intuitively displays the model predictions. The pie chart
-                                lets you interpret how the object classes are divided, which is useful when analyzing videos with numerous
-                                and differing objects.
+                                打标应用的主要功能是提供快速的打标服务和方便的展示交互  
+                                1. 打标过程遇上问题可以尝试阅读教程[链接](www.walterhuang.xyz/aidriving/label.html)  
+                                2. 展示交互出现问题  
+                                   * 确认文件目录是否正确，可以通过输入修改问题  
+                                   * 重新加载本程序进程
 
-                                ##### More about this Dash app
+                                ##### 更多
                                 
-                                The purpose of this demo is to explore alternative visualization methods for object detection. Therefore,
-                                the visualizations, predictions and videos are not generated in real time, but done beforehand. To read
-                                more about it, please visit the [project repo](https://github.com/plotly/dash-sample-apps/tree/master/apps/dash-object-detection).
+                                开发人员：
+                                基础研发部：黄明焕  
+                                qq : 1181850323  
 
                                 """
                                 )
@@ -162,6 +162,10 @@ app.layout = html.Div(
                                 html.Button(
                                     "需要帮助", id="help-button", n_clicks=0
                                 ),
+                                html.Div(dcc.Input(id='input-box', type='text')),
+    							html.Button('Submit', id='button'),
+    							html.Div(id='output-container-button',
+             						children='输入需要修改的子目录并按下按钮')
                             ],
                         ),
                         html.Div(
@@ -299,7 +303,7 @@ app.layout = html.Div(
                         html.Div(
                             className="control-element",
                             children=[
-                                html.Div(children=["车道:"]),
+                                html.Div(children=["车道颜色:"]),
                             dcc.RadioItems(
                                     id = "road_color",
                                     options=[
@@ -391,8 +395,6 @@ app.layout = html.Div(
                         
                         html.Button(id='submit-button', n_clicks=0, children='Submit'),
                         html.Div(id='output-state'),
-                        html.Div(id="div-visual-mode"),
-                        html.Div(id="div-detection-mode"),
                         dcc.ConfirmDialog(
                             id='confirm',
                             message='你已完成目标目录下的打标工作！',
@@ -441,7 +443,39 @@ def update_click_output(button_click, close_click):
 @app.callback(Output('current_working_dir', 'children'),
               [Input('submit-button', 'n_clicks')])
 def print_output(n_clicks):
-    return f.files.__str__()
+    return f'当前工作目录:"{f.return_relative_dir().__str__()}"'
+
+
+
+
+
+
+@app.callback(Output('output-state', 'children'),
+              [Input('road_brief','value')])
+def print_output(road_brief):
+	return f"当前标签：{road_brief}"
+
+
+
+
+
+# @app.callback(Output('output-state', 'children'),
+#               [Input('submit-button', 'n_clicks')],
+#               [State('road_brief','value'),
+#               State('shift','value'),
+#               State('road','value'),
+#               State('timing','value'),
+#               State('weather','value'),
+#               State('side','value'),
+#               State('road_color','value'),
+#               State('single_double','value'),
+#               State('width','value'),
+#               State('road_line','value'),
+#               State('other','value')])
+# def print_output(n_clicks,lis):
+# 	print(lis)
+# 	road_brief, shift, road, timing, weather,side, road_color, single_double, width, road_line, other = lis
+# 	return f'当前工作目录:"{road_brief}_{side}{road_color}{single_double}{width}_{road_line}_{other}"'
 
 
 
@@ -460,6 +494,22 @@ def update_outputx(str_):
         return True
     return False
 
+
+
+
+@app.callback(
+    Output('output-container-button', 'children'),
+    [Input('button', 'n_clicks')],
+    [State('input-box','value')])
+def update_output(_,value):
+	if not _ :
+		return "输入需要修改的子目录并按下按钮"
+	else:
+		f.re_init_(value)
+		folder = value
+		return f'你输入了 "{value}" '
+
+
 # @app.callback(Output('video-display', 'url'),
 #               [Input('submit-button', 'n_clicks')])
 # def print_output(n_clicks):
@@ -471,11 +521,19 @@ def update_outputx(str_):
 
 
 
+
+
+
+
+
+
+
+
 server = app.server
 @server.route('/data/<path:path>')
 def serve_static(path):
     root_dir = os.getcwd()
-    return flask.send_from_directory(os.path.join(root_dir, 'data'), path)
+    return flask.send_from_directory(os.path.join(root_dir, folder), path)
 
 
 

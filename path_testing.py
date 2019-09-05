@@ -29,6 +29,25 @@ class files_():
             raise ValueError(f"没有可以处理的文件")
         
 
+
+    def re_init_(self,data_dir):
+        self.code_dir = Path().resolve()
+        self.data_dir = Path(data_dir)
+        if not self.data_dir.is_absolute():
+            self.data_dir = self.code_dir/data_dir
+        if not self.data_dir.exists():
+            raise ValueError('Invalidate input path')
+        self.old_file = ''
+        self.new_file = ''
+        # default setting on data folder, change it if u need
+        self.files = list(self.data_dir.glob('*.mp4'))
+        # select unprocessed files with the length of file name < 67 
+        self.files = set([i for i in self.files if len(i.name) < 67])
+        if self.files:
+            self.file = False
+        else:
+            raise ValueError(f"没有可以处理的文件")
+
     def return_relative_dir(self):
         if self.file:
             return self.file.relative_to(self.code_dir)
