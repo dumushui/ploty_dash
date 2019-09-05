@@ -156,8 +156,8 @@ app.layout = html.Div(
                                 html.P(
                                     "打标开始，选择右边栏框内需要的标签，点击确定即可"
                                 ),
-                                html.P(
-                                    f"{f.return_relative_dir().__str__()}"
+                                html.P(id = "current_working_dir",
+                                    children=f"{f.return_relative_dir().__str__()}"
                                 ),
                                 html.Button(
                                     "需要帮助", id="help-button", n_clicks=0
@@ -170,7 +170,7 @@ app.layout = html.Div(
                                 className="video-container",
                                 children=player.DashPlayer(
                                     id="video-display",
-                                    url=f.return_relative_dir().__str__(),
+                                    url="",
                                     loop=True,
                                     controls=True,
                                     playing=True,
@@ -393,6 +393,10 @@ app.layout = html.Div(
                         html.Div(id='output-state'),
                         html.Div(id="div-visual-mode"),
                         html.Div(id="div-detection-mode"),
+                        dcc.ConfirmDialog(
+                            id='confirm',
+                            message='你已完成目标目录下的打标工作！',
+                        )
                     ],
                 ),
             ],
@@ -434,11 +438,35 @@ def update_click_output(button_click, close_click):
         return {"display": "none"}
 
 
+@app.callback(Output('current_working_dir', 'children'),
+              [Input('submit-button', 'n_clicks')])
+def print_output(n_clicks):
+    return f.files.__str__()
+
+
+
 @app.callback(Output('video-display', 'url'),
               [Input('submit-button', 'n_clicks')])
 def update_output(n_clicks):
     _ = f.pop_update()
     return f.return_relative_dir().__str__()
+
+
+
+@app.callback(Output('confirm', 'displayed'),
+              [Input('current_working_dir', 'children')])
+def update_outputx(str_):
+    if str_ == 'set()':
+        return True
+    return False
+
+# @app.callback(Output('video-display', 'url'),
+#               [Input('submit-button', 'n_clicks')])
+# def print_output(n_clicks):
+#     _ = f.pop_update()
+#     return f.return_relative_dir().__str__()
+
+
 
 
 
@@ -448,6 +476,7 @@ server = app.server
 def serve_static(path):
     root_dir = os.getcwd()
     return flask.send_from_directory(os.path.join(root_dir, 'data'), path)
+
 
 
 

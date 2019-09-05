@@ -24,20 +24,23 @@ class files_():
         # select unprocessed files with the length of file name < 67 
         self.files = set([i for i in self.files if len(i.name) < 67])
         if self.files:
-            self.file = self.files.pop()
+            self.file = False
         else:
             raise ValueError(f"没有可以处理的文件")
         
 
     def return_relative_dir(self):
-        return self.file.relative_to(self.code_dir)
+        if self.file:
+            return self.file.relative_to(self.code_dir)
+        else:
+            return "empty"
         
     def pop_update(self):
         if self.files:
             self.file = self.files.pop()
             return self.file
         else:
-            raise ValueError(f"已经没有可以处理的文件")
+            return "empty"
 
 
 if __name__ == '__main__':
